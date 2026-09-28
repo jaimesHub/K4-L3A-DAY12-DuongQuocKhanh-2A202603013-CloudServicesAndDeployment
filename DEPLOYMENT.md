@@ -10,17 +10,17 @@
 
 | Mục | Nội dung |
 |-----|----------|
-| Họ và tên | (điền họ tên) |
-| Mã học viên | (điền mã học viên) |
-| Repo | (điền link repo K4-L3A-DAY12-HoVaTen-MSSV-CloudServicesAndDeployment) |
+| Họ và tên | Dương Quốc Khánh |
+| Mã học viên | 2A202603013 |
+| Repo | https://github.com/jaimesHub/K4-L3A-DAY12-DuongQuocKhanh-2A202603013-CloudServicesAndDeployment |
 
 ## Service
 
 | Mục | Nội dung |
 |-----|----------|
-| Public URL | https://TODO-thay-bang-url-that.up.railway.app |
-| Platform | Railway / Render / Cloud Run — (điền platform bạn dùng) |
-| Ngày deploy | (điền ngày) |
+| Public URL | https://agent-production-292b.up.railway.app |
+| Platform | Railway |
+| Ngày deploy | 2026-09-28 |
 
 ## Biến Môi Trường Đã Set Trên Cloud
 
@@ -30,7 +30,7 @@ Ghi tên biến và **nguồn giá trị**, không ghi giá trị:
 |------|--------|---------|
 | `PORT` | ✅ | platform tự gán |
 | `AGENT_API_KEY` | ✅ | đặt trong dashboard, không nằm trong repo |
-| `REDIS_URL` | ✅ | (điền: Redis add-on của platform / Upstash / ...) |
+| `REDIS_URL` | ✅ | Redis service riêng trong cùng project Railway, qua `${{Redis.REDIS_URL}}` (không phải Upstash) |
 | `RATE_LIMIT_PER_MINUTE` | ✅ | 10 |
 | `MONTHLY_BUDGET_USD` | ✅ | 10.0 |
 | `LOG_LEVEL` | ✅ | INFO |
@@ -73,8 +73,39 @@ done; echo
 Dán output của các lệnh trên vào đây:
 
 ```
-(điền output)
+=== 1. /health ===
+HTTP/2 200
+content-type: application/json
+server: railway-hikari
+
+{"status":"ok","service":"day12-agent","version":"1.0.0"}
+
+=== 2. /ready ===
+HTTP/2 200
+content-type: application/json
+server: railway-hikari
+
+{"status":"ready","redis":true}
+
+=== 3. /ask không có API key ===
+HTTP/2 401
+content-type: application/json
+server: railway-hikari
+
+{"detail":"invalid or missing API key"}
+
+=== 4. /ask có API key ===
+HTTP/2 200
+content-type: application/json
+server: railway-hikari
+
+{"answer":"Câu hỏi hay. Deploy là gì thường được giải quyết bằng cách chuẩn hóa môi trường chạy: cùng một image chạy giống nhau ở laptop và trên cloud.","user_id":"sv-test","history_length":0,"cost_usd":2.145e-05,"tokens":{"in":3,"out":35}}
+
+=== 5. Rate limit — 15 lần gọi liên tiếp (RATE_LIMIT_PER_MINUTE=10) ===
+200 200 200 200 200 200 200 200 200 429 429 429 429 429 429
 ```
+
+9 request đầu trả 200, từ request thứ 10 trở đi bị chặn với 429 — đúng như kỳ vọng với `RATE_LIMIT_PER_MINUTE=10`.
 
 ## Ảnh Chụp Màn Hình
 
@@ -87,15 +118,6 @@ Dán output của các lệnh trên vào đây:
 
 ## Nếu Dùng Phương Án Dự Phòng
 
-Không đăng ký được tài khoản cloud? Vẫn nộp được bài, nhưng CP5 tối đa 60% điểm:
-
-1. Đặt `LOCAL_FALLBACK=true` trong `.env`
-2. Chạy `docker compose up -d` rồi kiểm tra `docker compose ps`
-3. Chụp màn hình vào `screenshots/`
-4. Chạy `pytest tests/test_cp5.py -v` — bộ test sẽ tự chuyển sang kiểm tra
-   `http://localhost:8000`
-5. Ghi rõ lý do không deploy được vào phần dưới đây:
-
-```
-(điền lý do nếu dùng phương án dự phòng, ngược lại xóa mục này)
-```
+Không áp dụng — học viên đã deploy thành công lên Railway tại
+https://agent-production-292b.up.railway.app, không cần dùng phương án dự
+phòng (không set `LOCAL_FALLBACK`).
